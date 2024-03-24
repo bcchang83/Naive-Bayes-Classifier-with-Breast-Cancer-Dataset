@@ -4,6 +4,7 @@ import random
 import matplotlib.pyplot as plt
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LinearRegression
 
 
 def splitData(data):
@@ -43,11 +44,25 @@ for i in data:
     try:
         clean_data.append(i.astype(int))
     except:
-        wrong_data.append(i)
+        wrong_data.append(np.array(i))
 clean_data = np.array(clean_data)
 wrong_data = np.array(wrong_data)
 print("Numbers of clean data = {}".format(len(clean_data)))
 print("Numbers of wrong data = {}".format(len(wrong_data)))
+getMissingData = True
+if getMissingData:
+    print("Using linear regression gets missing data")
+    x_train_find = clean_data[:, [1, 2, 3, 4, 5, 7, 8, 9, 10]]
+    y_train_find = clean_data[:, 6]
+    x_test_find = wrong_data[:, [1, 2, 3, 4, 5, 7, 8, 9, 10]].astype(int)
+
+    model = LinearRegression()
+    model.fit(x_train_find, y_train_find)
+    y_pred_find = model.predict(x_test_find)
+    y_pred_find = y_pred_find.astype(int)
+    wrong_data[:, 6] = y_pred_find
+    wrong_data = wrong_data.astype(int)
+    clean_data = np.concatenate((clean_data, wrong_data))
 acc_test_list = []
 for t in range(10):
 
@@ -81,7 +96,7 @@ for t in range(10):
     model.fit(x_train[:, picked_attr], y_train)
     y_pred = model.predict(x_test[:, picked_attr])
     acc_test = accuracy_score(y_test, y_pred)
-    print("accurate :{}".format(acc_test))
+    print("accuracy :{}".format(acc_test))
     acc_test_list.append(acc_test)
 
 plt.figure(1)
